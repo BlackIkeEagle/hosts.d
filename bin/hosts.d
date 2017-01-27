@@ -5,7 +5,18 @@ HOSTS="/etc/hosts"
 HOSTSD="/etc/hosts.d"
 
 usage() {
-    echo "usage"
+    echo "$0 [options]"
+    echo ""
+    echo " -h, --help    show help"
+    echo " -c, --config  config file with hosts and hosts.d file"
+    echo " -f, --format  output format (hosts, dnsmasq)"
+    echo " -d, --daemon  run in daemon mode"
+    echo ""
+    echo "example:"
+    echo ""
+    echo " $0 -c /etc/hostsd.config"
+    echo " $0 -f dnsmasq"
+    echo " $0 -d"
 }
 
 check_configfile() {
