@@ -1,8 +1,6 @@
 #!/usr/bin/env sh
 # vim: ft=sh:
 
-set -x
-
 HOSTS="/etc/hosts"
 HOSTSD="/etc/hosts.d"
 
@@ -111,9 +109,23 @@ hostsd_format_out_dnsmasq() {
     done
 }
 
+hostsd_daemon() {
+    local outformat=$1
+
+    hostsd_write $outformat
+
+    while true #run indefinitely
+    do
+        inotifywait -r \
+            -e modify,attrib,close_write,move,create,delete "$HOSTSD" \
+            && hostsd_write $outformat
+    done
+}
+
 run() {
     local configfile=''
     local outformat=''
+    local daemon='off'
 
     # getopts
     while true; do
@@ -136,6 +148,10 @@ run() {
                 fi
                 shift
                 ;;
+            -d | --daemon )
+                daemon='on'
+                shift
+                ;;
             * ) shift ;;
         esac
         if [[ 0 -eq $# ]]; then
@@ -152,7 +168,11 @@ run() {
 
     outformat=$(check_outformat $outformat)
 
-    hostsd_write $outformat
+    if [ "on" = "$daemon" ]; then
+        hostsd_daemon $outformat
+    else
+        hostsd_write $outformat
+    fi
 }
 
 run $@
